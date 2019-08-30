@@ -152,16 +152,17 @@ def create_schema_graph(tables=None, metadata=None, show_indexes=True,
     show_datatypes=True, font="Bitstream-Vera Sans",
     concentrate=True, relation_options={}, rankdir='TB',
     show_column_keys=False, restrict_tables=None, dbpickle=None,
-    pickle_metadata=False):
+    pickle_path=None):
     """
     Args:
       show_column_keys (boolean, default=False): If true then add a
         PK/FK suffix to columns names that are primary and foreign keys
       restrict_tables (None or list of strings): Restrict the graph
         to only consider tables whose name are defined restrict_tables
-      dbtables (str): path to preloaded .pickle with reflected metadata
-      pickle_metadata (boolean, default=False): If true dump reflected
-        metadata to pickle in working dir
+      dbpickle (pickle): object containing DB metadata from
+        pickle_metadata
+      pickle_metadata (str): Path to dump reflected metadata to pickle
+        in working dir
     """
     relation_kwargs = {
         'fontsize':"7.0"
@@ -176,8 +177,8 @@ def create_schema_graph(tables=None, metadata=None, show_indexes=True,
         if not len(metadata.tables):
             metadata.reflect()
         tables = metadata.tables.values()
-        if pickle_metadata:
-            with open(f'{int(time.time())}.pickle', 'wb') as f:
+        if pickle_path is not None:
+            with open(f'{pickle_path}', 'wb') as f:
                 pickle.dump(metadata.tables, f)
     else:
         raise ValueError("You need to specify at least tables or metadata")
