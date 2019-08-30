@@ -148,33 +148,45 @@ def _render_table_html(table, metadata, show_indexes, show_datatypes, show_colum
     html += '</TABLE>>'
     return html
 
-def create_schema_graph(tables=None, metadata=None, show_indexes=True, show_datatypes=True, font="Bitstream-Vera Sans",
-    concentrate=True, relation_options={}, rankdir='TB', show_column_keys=False, restrict_tables=None):
+def create_schema_graph(tables=None, metadata=None, show_indexes=True,
+    show_datatypes=True, font="Bitstream-Vera Sans",
+    concentrate=True, relation_options={}, rankdir='TB',
+    show_column_keys=False, restrict_tables=None, dbpickle=None,
+    pickle_metadata=False):
     """
     Args:
-      show_column_keys (boolean, default=False): If true then add a PK/FK suffix to columns names that are primary and foreign keys
-      restrict_tables (None or list of strings): Restrict the graph to only consider tables whose name are defined restrict_tables
+      show_column_keys (boolean, default=False): If true then add a
+        PK/FK suffix to columns names that are primary and foreign keys
+      restrict_tables (None or list of strings): Restrict the graph
+        to only consider tables whose name are defined restrict_tables
+      dbtables (str): path to preloaded .pickle with reflected metadata
+      pickle_metadata (boolean, default=False): If true dump reflected
+        metadata to pickle in working dir
     """
-
     relation_kwargs = {
         'fontsize':"7.0"
     }
     relation_kwargs.update(relation_options)
-
     if metadata is None and tables is not None and len(tables):
         metadata = tables[0].metadata
+    elif dbpickle is not None:
+        with open(dbpickle, 'rb') as f:
+            tables = pickle.load(f).values()
     elif tables is None and metadata is not None:
         if not len(metadata.tables):
             metadata.reflect()
         tables = metadata.tables.values()
+        if pickle_metadata:
+            with open(f'{int(time.time())}.pickle', 'wb') as f:
+                pickle.dump(metadata.tables, f)
     else:
         raise ValueError("You need to specify at least tables or metadata")
-
     graph = pydot.Dot(prog="dot",mode="ipsep",overlap="ipsep",sep="0.01",concentrate=str(concentrate), rankdir=rankdir)
     if restrict_tables is None:
         restrict_tables = set([t.name.lower() for t in tables])
     else:
         restrict_tables = set([t.lower() for t in restrict_tables])
+
     tables = [t for t in tables if t.name.lower() in restrict_tables]
     for table in tables:
 
