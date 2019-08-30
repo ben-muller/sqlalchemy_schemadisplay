@@ -4,6 +4,7 @@ from sqlalchemy.orm.properties import RelationshipProperty
 from sqlalchemy.orm import sync
 import pydot
 import types
+import pickle
 
 __all__ = ['create_uml_graph', 'create_schema_graph', 'show_uml_graph', 'show_schema_graph']
 
