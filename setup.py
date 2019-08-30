@@ -20,6 +20,7 @@ setup(
     install_requires=[
         'setuptools',
         'pydot',
+        'pickle',
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
